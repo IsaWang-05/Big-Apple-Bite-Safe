@@ -1,0 +1,187 @@
+<!-- References: -->
+    <!-- https://www.w3schools.com/html/html_forms.asp -->
+    <!-- https://www.w3schools.com/css/css_icons.asp -->
+    <!-- https://www.webdeveloperguide.in/bootstrap-css-framework/ -->
+    <!-- https://stackoverflow.com/questions/29147806/how-can-i-set-the-image-opacity-for-body-background -->
+
+<!-- Resources (icon, picture, etc.): -->
+    <!-- https://fontawesome.com/v5/icons/apple?f=brands&s=solid -->
+    <!-- https://www.w3schools.com/icons/tryit.asp?icon=fas_fa-utensils&unicon=f2e7 -->
+    <!-- https://www.newyorker.com/humor/daily-shouts/nyc-vs-la-drawn-from-memory -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Inspection Prediction</title>
+    <!-- Bootstrap for css -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- font awesome for nav icon -->
+    <link href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            color: #495057;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body::after {
+          content: "";
+          background-image: url("/static/food.webp");
+          opacity: 0.3;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          right: 0;
+          position: absolute;
+          z-index: -1;   
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            margin-bottom: 40px;
+        }
+        h1 {
+            color: #155724;
+            margin-bottom: 1.5rem;
+        }
+        .navbar {
+            background-color: #343a40;
+        }
+        .navbar-brand {
+            font-size: 1.8em;
+            color: #f8f9fa;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #28a745;
+            border-color: #28a745;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover {
+            background-color: #218838; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .alert-info {
+            background-color: #d4edda;
+            border-color: #b8daff;
+            color: #155724;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .alert:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .form-group label {
+            font-weight: bold;
+            color: #6c757d;
+        }
+        .form-control {
+            border-radius: 6px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+        }
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigator for decor -->
+    <nav class="navbar navbar-expand-md navbar-dark">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-utensils" style="margin-right: 3px;"></i>
+            <i class="fab fa-apple" style="margin-right: 5px;"></i>
+            Big Apple BiteSafe - NYC Restaurant Predictor
+        </a>
+
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center">Predict Restaurant Inspections</h1>
+
+        <!-- Form to take user dba input -->
+        <form action="/predict" method="post" class="mb-4">
+            <div class="form-group">
+                <label for="dba">Enter Restaurant Name:</label>
+                <input type="text" class="form-control" id="dba" name="dba" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                Predict <i class="fas fa-utensils" style="margin-right: 3px;"></i>
+            </button>
+        </form>
+
+        <!-- Display Prediction Results -->
+        {% if prediction_text %}
+            <div class="alert" 
+                 style="{% if prediction_text == 'Critical Violation' %}background-color: #f8d7da; border-color: #f5c6cb; color: #721c24;{% else %}background-color: #d4edda; border-color: #c3e6cb; color: #155724;{% endif %}">
+                <h4 class="alert-heading">Prediction Results for {{ dba_input }}'s next hygiene inspection</h4>
+                <p>Violation level (Critical/Not Critical) Prediction (Based on {{ num_records }} records of this restaurant): {{ prediction_text }}</p>
+            </div>
+        {% endif %}
+
+        <!-- Display Latest record for insights -->
+        {% if latest_record %}
+            <h3>Latest Record Details:</h3>
+            <table>
+                {% for key, value in latest_record.items() %}
+                    <tr>
+                        <td><strong>{{ key }}</strong></td>
+                        <td>
+                            {{ value }}
+                            {% if key == 'score' %}
+                                (Note: 0 to 13 is an A, 14 to 27 points is a B, and 28 or more points is a C)
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            
+        {% endif %}
+
+        <p>The accuracy of this model is ~92%.</p>
+
+    <div class="dba-list">
+        <h3>List of Restaurants:</h3>
+        <p>Tips:<br>
+
+            1. To quickly find restaurants with their partial names, use the in-page search (Ctrl+F). And yes, this list is ready for some 'copy-pasta' — a little food humor for you!<br>
+            2. Please note that a few restaurants might not yield results, as they were not included in our initial training data, impacting label precision and subsequent predictions.
+        </p>
+
+
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for dba in sorted_dba %}
+                <div style="flex: 0 0 50%; box-sizing: border-box;">
+                    {{ dba }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        <p>© {{ current_year }} Restaurant Predictor created by Karl Liu, Tracy Hu, Isa Wang. All Rights Reserved.</p>
+    </footer>
+    <!-- Bootstrap -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
